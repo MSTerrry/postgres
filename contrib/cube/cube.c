@@ -99,7 +99,7 @@ void		rt_cube_size(NDBOX *a, double *sz);
 NDBOX	   *g_cube_binary_union(NDBOX *r1, NDBOX *r2, int *sizep);
 bool		g_cube_leaf_consistent(NDBOX *key, NDBOX *query, StrategyNumber strategy);
 bool		g_cube_internal_consistent(NDBOX *key, NDBOX *query, StrategyNumber strategy);
-
+void 		void rt_cube_perimeter(NDBOX *a, double *size);
 /*
 ** Auxiliary funxtions
 */
@@ -457,8 +457,8 @@ g_cube_penalty(PG_FUNCTION_ARGS)
 
 	ud = cube_union_v0(DatumGetNDBOX(origentry->key),
 					   DatumGetNDBOX(newentry->key));
-	rt_cube_size(ud, &tmp1);
-	rt_cube_size(DatumGetNDBOX(origentry->key), &tmp2);
+	rt_cube_perimeter(ud, &tmp1);
+	rt_cube_perimeter(DatumGetNDBOX(origentry->key), &tmp2);
 	*result = (float) (tmp1 - tmp2);
 
 	/*
@@ -894,7 +894,19 @@ cube_size(PG_FUNCTION_ARGS)
 	PG_FREE_IF_COPY(a, 0);
 	PG_RETURN_FLOAT8(result);
 }
-
+void rt_cube_perimeter(NDBOX *a, double *size)
+{
+	int i;
+	if(a == (NDBOX *) NULL)
+		*size = 0.0;
+	else
+	{
+		*size = 0.0;
+	for(i=0; i< DIM(a); i++)
+		*size = (*size) + Abs(UR_COORD(a, i) - LL_COORD(a, i));
+	}
+	return;
+}
 void
 rt_cube_size(NDBOX *a, double *size)
 {
